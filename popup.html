@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BNI Connect Scrapper</title> <!-- Title that appears in the browser tab -->
+  <meta charset="utf-8"> <!-- Tell browser we're using standard text encoding -->
+  
+  <!--
+    MAIN STYLING SECTION
+    This CSS controls how our popup looks and feels to the user
+    Think of it like decorating a room - we're choosing colors, sizes, and layouts
+    The popup needs to look professional since BNI members will be using it
+  -->
+  <style>
+    /*
+     * MAIN POPUP CONTAINER STYLING
+     * This sets up the overall look and size of our popup window
+     * We use a gradient background to make it look modern and professional
+     */
+    body { 
+      width: 450px; /* Make popup exactly 450 pixels wide */
+      font-family: Arial, sans-serif; /* Use clean, readable font */
+      padding: 15px; /* Add space around the edges */
+      background: linear-gradient(135deg, #f46161 0%, #a92121 100%); /* Beautiful red gradient background */
+      color: white; /* Make all text white to stand out on red background */
+      margin: 0; /* Remove default spacing */
+    }
+    
+    /*
+     * GLASS EFFECT CONTAINER
+     * This creates a modern "glass" effect that makes the popup look premium
+     * The blur effect and transparency make it look like frosted glass
+     */
+    .container {
+      background: rgba(255, 255, 255, 0.1); /* Semi-transparent white background */
+      border-radius: 10px; /* Rounded corners for modern look */
+      padding: 20px; /* Space inside the container */
+      backdrop-filter: blur(10px); /* Blur effect for glass appearance */
+    }
+    
+    /*
+     * HEADER STYLING
+     * The main title at the top of our popup
+     */
+    h2 { 
+      margin-top: 0; /* Remove default top spacing */
+      text-align: center; /* Center the title */
+      font-size: 18px; /* Make title nicely sized */
+      margin-bottom: 10px; /* Add space below title */
+    }
+    
+    /*
+     * DESCRIPTION TEXT STYLING
+     * Small descriptive text that explains what the extension does
+     */
+    p { 
+      font-size: 12px; /* Small, readable text */
+      margin-bottom: 15px; /* Space below description */
+      opacity: 0.9; /* Slightly transparent for subtle effect */
+      text-align: center; /* Center the description */
+    }
+    
+    /*
+     * MAIN BUTTON STYLING
+     * These are the primary action buttons users click to use the extension
+     * We make them look clickable and provide hover effects for better user experience
+     */
+    button { 
+      width: 100%; /* Buttons stretch full width */
+      margin-top: 8px; /* Space between buttons */
+      padding: 12px; /* Comfortable clicking area */
+      background: rgba(153, 39, 39, 0.2); /* Semi-transparent dark red background */
+      color: white; /* White text on buttons */
+      border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle white border */
+      border-radius: 6px; /* Rounded button corners */
+      cursor: pointer; /* Show hand cursor when hovering */
+      font-weight: 500; /* Make text slightly bold */
+      transition: all 0.3s ease; /* Smooth animation when hovering */
+      font-size: 14px; /* Readable button text size */
+    }
+    
+    /*
+     * BUTTON HOVER EFFECTS
+     * Makes buttons interactive and responsive when user hovers over them
+     */
+    button:hover { 
+      background: rgba(246, 6, 6, 0.3); /* Brighter red when hovering */
+      transform: translateY(-1px); /* Slightly lift button when hovering */
+    }
+    
+    /*
+     * DISABLED BUTTON STYLING
+     * When buttons can't be clicked, they look faded and unclickable
+     */
+    button:disabled { 
+      background: rgba(62, 2, 2, 0.1); /* Very faded background */
+      cursor: not-allowed; /* Show "not allowed" cursor */
+      opacity: 0.6; /* Make button look faded */
+      transform: none; /* No hover effect when disabled */
+    }
+    
+    /*
+     * BUTTON GROUP LAYOUT
+     * For buttons that appear side by side
+     */
+    .button-group {
+      display: flex; /* Put buttons in a row */
+      gap: 8px; /* Space between buttons */
+      margin-top: 15px; /* Space above button group */
+    }
+    
+    .button-group button {
+      margin-top: 0; /* Remove individual button margins */
+      flex: 1; /* Make buttons share space equally */
+      font-size: 12px; /* Smaller text for grouped buttons */
+      padding: 10px 8px; /* Less padding for smaller buttons */
+    }
+    
+    /*
+     * SAVE LOCATION DISPLAY STYLING
+     * Shows users where their CSV file will be saved
+     * Positioned between Step 1 and Step 2 for visibility
+     * This replaces the redundant download notification block
+     */
+    .save-location {
+      background: rgba(255, 255, 255, 0.05); /* Very subtle white background */
+      border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white border */
+      border-radius: 6px; /* Rounded corners */
+      padding: 12px; /* Space inside the box */
+      margin: 15px 0; /* Space above and below */
+      display: none; /* Hidden until profiles are checked */
+    }
+    
+    .save-location-content {
+      display: flex; /* Put icon and info side by side */
+      align-items: center; /* Center vertically */
+      gap: 10px; /* Space between icon and info */
+    }
+    
+    .save-icon {
+      font-size: 16px; /* Size of folder icon */
+      opacity: 0.8; /* Slightly transparent */
+    }
+    
+    .save-info {
+      flex-grow: 1; /* Take up remaining space */
+      min-width: 0; /* Allow text to wrap if needed */
+    }
+    
+    .save-label {
+      font-size: 11px; /* Small label text */
+      color: rgba(255, 255, 255, 0.7); /* Lighter color for label */
+      margin-bottom: 2px; /* Small space below label */
+    }
+    
+    .save-path {
+      font-size: 12px; /* Readable path text */
+      font-weight: 500; /* Slightly bold */
+      color: white; /* Full white for path */
+      word-break: break-all; /* Break long paths */
+      margin-bottom: 2px; /* Small space below path */
+    }
+    
+    .save-filename {
+      font-size: 11px; /* Small filename text */
+      color: rgba(255, 255, 255, 0.8); /* Slightly transparent */
+      font-style: italic; /* Italicize the filename */
+    }
+    
+    /*
+     * STATUS DISPLAY AREA
+     * This shows users what's happening while the extension is working
+     * It's like a conversation bubble where the extension talks to the user
+     */
+    #status { 
+      margin-top: 15px; /* Space above status area */
+      color: #f1ecec; /* Light color for status text */
+      min-height: 40px; /* Always reserve space for status messages */
+      font-size: 11px; /* Small, readable text */
+      background: rgba(0, 0, 0, 0.2); /* Dark semi-transparent background */
+      padding: 10px; /* Space inside status box */
+      border-radius: 5px; /* Rounded corners */
+      line-height: 1.4; /* Comfortable line spacing for reading */
+    }
+    
+    /*
+     * PROGRESS BAR STYLING
+     * Visual indicator showing how much work is completed
+     * Like a loading bar in video games or file downloads
+     */
+    .progress-bar {
+      width: 100%; /* Full width progress bar */
+      height: 6px; /* Thin but visible height */
+      background: rgba(255, 255, 255, 0.2); /* Light background for empty part */
+      border-radius: 3px; /* Rounded ends */
+      overflow: hidden; /* Keep progress fill inside bounds */
+      margin: 10px 0; /* Space above and below */
+      display: none; /* Hidden by default until scraping starts */
+    }
+    
+    .progress-fill {
+      height: 100%; /* Fill the full height of progress bar */
+      background: linear-gradient(90deg, #4CAF50, #8BC34A); /* Green gradient for progress */
+      border-radius: 3px; /* Rounded ends to match container */
+      width: 0%; /* Start with no progress */
+      transition: width 0.3s ease; /* Smooth animation as progress increases */
+    }
+    
+    /*
+     * STATISTICS PANEL STYLING
+     * Shows detailed information about the scraping process
+     * Like a dashboard showing performance metrics
+     */
+    .stats {
+      display: none; /* Hidden by default until scraping starts */
+      margin-top: 10px; /* Space above stats panel */
+      font-size: 11px; /* Small text for detailed info */
+      opacity: 0.8; /* Slightly transparent for subtle appearance */
+      background: rgba(0, 0, 0, 0.1); /* Dark background for contrast */
+      padding: 10px; /* Space inside stats panel */
+      border-radius: 5px; /* Rounded corners */
+    }
+    
+    /*
+     * STATS ROW LAYOUT
+     * Each statistic appears in its own row with label and value
+     */
+    .stats-row {
+      display: flex; /* Put label and value side by side */
+      justify-content: space-between; /* Push label left and value right */
+      margin-bottom: 5px; /* Space between different stats */
+    }
+    
+    .stats-row:last-child {
+      margin-bottom: 0; /* Remove bottom margin from last stat */
+    }
+    
+    /*
+     * WARNING MESSAGE STYLING
+     * For showing important notices to users about rate limiting, etc.
+     */
+    .warning {
+      background: rgba(106, 2, 2, 0.2); /* Dark red background for warnings */
+      border: 1px solid rgba(255, 152, 0, 0.4); /* Orange border for attention */
+      padding: 8px; /* Space inside warning box */
+      border-radius: 4px; /* Rounded corners */
+      font-size: 10px; /* Small text for warnings */
+      margin-bottom: 10px; /* Space below warning */
+      text-align: center; /* Center warning text */
+    }
+    
+    /*
+     * INFORMATION PANEL STYLING
+     * Shows details about profiles found and estimated time
+     * Like a summary card before starting the scraping process
+     */
+    .info-panel {
+      background: rgba(255, 255, 255, 0.05); /* Very subtle white background */
+      border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+      padding: 12px; /* Space inside panel */
+      border-radius: 6px; /* Rounded corners */
+      margin: 10px 0; /* Space above and below */
+      display: none; /* Hidden until profiles are found */
+    }
+    
+    /*
+     * INFO ITEM LAYOUT
+     * Each piece of information in the info panel (like "Profiles Found: 25")
+     */
+    .info-item {
+      display: flex; /* Put label and value side by side */
+      justify-content: space-between; /* Spread apart label and value */
+      margin-bottom: 8px; /* Space between different info items */
+      font-size: 12px; /* Readable text size */
+    }
+    
+    .info-item:last-child {
+      margin-bottom: 0; /* Remove bottom margin from last item */
+    }
+    
+    .info-label {
+      opacity: 0.8; /* Make labels slightly faded */
+    }
+    
+    .info-value {
+      font-weight: bold; /* Make values stand out */
+    }
+    
+    /*
+     * FILTER INFORMATION DISPLAY
+     * Shows what search filters are currently active on the BNI page
+     * Helps users understand what data they're about to scrape
+     */
+    .filter-info {
+      background: rgba(0, 0, 0, 0.2); /* Dark background for contrast */
+      padding: 8px; /* Space inside filter box */
+      border-radius: 4px; /* Rounded corners */
+      margin-top: 8px; /* Space above filter info */
+      font-size: 10px; /* Small text for filter details */
+      display: none; /* Hidden until filters are detected */
+      max-height: 60px; /* Limit height to prevent huge boxes */
+      overflow-y: auto; /* Add scrolling if too many filters */
+    }
+    
+    /*
+     * FILTER TAG STYLING
+     * Individual filter items appear as small tags/badges
+     */
+    .filter-tag {
+      display: inline-block; /* Allow tags to flow side by side */
+      background: rgba(255, 255, 255, 0.1); /* Light background for tags */
+      padding: 2px 6px; /* Small padding for compact tags */
+      margin: 2px; /* Small space between tags */
+      border-radius: 3px; /* Rounded tag corners */
+      font-size: 9px; /* Very small text for tags */
+    }
+    
+    /*
+     * TIMER DISPLAY STYLING
+     * Shows real-time progress and time estimates during scraping
+     * Like a countdown timer showing how much work is left
+     */
+    .timer-display {
+      background: rgba(0, 0, 0, 0.3); /* Dark background for emphasis */
+      padding: 8px; /* Space inside timer box */
+      border-radius: 4px; /* Rounded corners */
+      margin: 8px 0; /* Space above and below */
+      text-align: center; /* Center timer text */
+      font-size: 12px; /* Readable timer text */
+      font-weight: bold; /* Make timer text stand out */
+      display: none; /* Hidden until scraping starts */
+    }
+  </style>
+</head>
+<body>
+  <!--
+    MAIN POPUP CONTAINER
+    This is the visible part of our extension that users interact with
+    Everything is organized in a logical flow from top to bottom
+  -->
+  <div class="container">
+    <!-- Extension title that users see first -->
+    <h2>BNI Connect Scraper</h2>
+    
+    <!--
+      STEP 1: PROFILE CHECKING BUTTON
+      This button starts the process by looking at the current BNI page
+      It counts how many profiles are available and detects any active filters
+      Corresponds to the checkProfiles() function in popup.js
+    -->
+    <button id="checkProfiles">1. Check Profiles </button>
+    
+    <!--
+      FILTER INFORMATION DISPLAY
+      Shows users what search filters are currently active on the BNI page
+      This helps them understand exactly what data they're about to scrape
+      Hidden until filters are detected by the extension
+      Populated by the extractSearchFilters() function
+    -->
+    <div class="filter-info" id="filterInfo">
+      <strong>Detected Filters:</strong> <!-- Label for filter section -->
+      <div id="filterTags"></div> <!-- Container where filter tags will appear -->
+    </div>
+    
+    <!--
+      PROFILE INFORMATION PANEL
+      Shows summary information about profiles found on the page
+      Includes count, estimated time, and other helpful details
+      Hidden until profiles are successfully detected
+      Data populated by checkProfiles() function
+    -->
+    <div class="info-panel" id="profileInfo">
+      <!-- How many profiles were found on the current page -->
+      <div class="info-item">
+        <span class="info-label">Profiles Found:</span>
+        <span class="info-value" id="profileCount">0</span>
+      </div>
+      
+      <!-- How long each profile takes to scrape (helps set expectations) -->
+      <div class="info-item">
+        <span class="info-label">Est. Time per Profile:</span>
+        <span class="info-value">8-12 seconds</span>
+      </div>
+      
+      <!-- Total estimated time for the entire scraping job -->
+      <div class="info-item">
+        <span class="info-label">Total Estimated Time:</span>
+        <span class="info-value" id="estimatedTime">0 min</span>
+      </div>
+    </div>
+    
+    <!--
+      SAVE LOCATION DISPLAY
+      Shows users exactly where their CSV file will be saved
+      Appears between Step 1 and Step 2 for better user awareness
+      Updated by updateSaveLocationDisplay() function throughout the process
+      This eliminates the need for redundant download notifications
+    -->
+    <div class="save-location" id="saveLocation">
+      <div class="save-location-content">
+        <div class="save-icon">📁</div> <!-- Folder icon for visual clarity -->
+        <div class="save-info">
+          <div class="save-label">Save Location:</div> <!-- Label explaining what this shows -->
+          <div class="save-path">Loading...</div> <!-- Directory path where file will be saved -->
+          <div class="save-filename">Ready to save...</div> <!-- Current filename and status -->
+        </div>
+      </div>
+    </div>
+
+    <!--
+      STEP 2: MAIN SCRAPING BUTTON
+      This button starts the actual data collection process
+      Disabled until Step 1 is completed successfully
+      Triggers the startProfileScraping() function
+    -->
+    <button id="scrapeData" disabled>2. Start Scraping</button>
+    
+    <!--
+      REAL-TIME TIMER DISPLAY
+      Shows live progress information while scraping is happening
+      Updates every few seconds to keep users informed
+      Hidden until scraping actually starts
+      Controlled by startTimer() and updateTimeRemaining() functions
+    -->
+    <div class="timer-display" id="timerDisplay">
+      <!-- Current progress through the profile list -->
+      <div>Profile <span id="currentProfile">0</span> of <span id="totalProfiles">0</span></div>
+      <!-- Estimated time remaining (gets more accurate as scraping progresses) -->
+      <div>Estimated Time Remaining: <span id="timeRemaining">--</span></div>
+    </div>
+    
+    <!--
+      VISUAL PROGRESS BAR
+      Shows completion percentage as a green bar that fills up
+      Provides quick visual feedback on scraping progress
+      Hidden until scraping starts
+      Updated by updateProgress() function
+    -->
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-fill" id="progressFill"></div> <!-- The green part that grows -->
+    </div>
+    
+    <!--
+      DETAILED STATISTICS PANEL
+      Shows comprehensive information about the scraping process
+      Includes success/failure counts, batch progress, timing data
+      Hidden until scraping starts
+      Updated by handleProfileCompletion() and updateAverageTime() functions
+    -->
+    <div class="stats" id="stats">
+      <!-- How many profiles were successfully scraped -->
+      <div class="stats-row">
+        <span>Successfully Scraped:</span>
+        <span id="scrapedProfiles">0</span>
+      </div>
+      
+      <!-- How many profiles failed to scrape -->
+      <div class="stats-row">
+        <span>Failed:</span>
+        <span id="failedProfiles">0</span>
+      </div>
+      
+      <!-- Average time per profile (calculated from actual performance) -->
+      <div class="stats-row">
+        <span>Average Time/Profile:</span>
+        <span id="avgTime">--</span>
+      </div>
+    </div>
+    
+    <!--
+      MAIN STATUS MESSAGE AREA
+      This is where the extension communicates with users
+      Shows current activity, error messages, success notifications, etc.
+      Always visible to keep users informed about what's happening
+      Updated throughout the process by various functions
+    -->
+    <div id="status">Ready to check profiles on current page...</div>
+  </div>
+  
+  <!-- Link to our JavaScript file that makes everything work -->
+  <script src="popup.js"></script>
+</body>
+</html>
