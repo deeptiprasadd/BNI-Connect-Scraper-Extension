@@ -1,6 +1,6 @@
 # BNI-Connect-Scraper-Extension
 
-BNI Connect Scraper - Full Guide
+Full Guide
 ================================
 
 Part 1: How to Use BNI Website
